@@ -13,10 +13,9 @@ import android.widget.EditText
 import android.widget.RadioButton
 import android.widget.RadioGroup
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.os.bundleOf
 import androidx.lifecycle.lifecycleScope
+import com.example.minovatestapp.util.clearAndHide
 import com.example.minovatestapp.util.getIntOrZero
-import com.example.minovatestapp.util.hide
 import com.example.minovatestapp.util.show
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -25,7 +24,6 @@ import no.entur.android.nfc.external.ExternalNfcServiceAdapter
 import no.entur.android.nfc.external.ExternalNfcServiceCallback
 import no.entur.android.nfc.external.ExternalNfcTagCallback
 import no.entur.android.nfc.external.minova.reader.McrReader
-import no.entur.android.nfc.external.minova.service.MinovaService
 import no.entur.android.nfc.wrapper.Tag
 
 class MainActivity : AppCompatActivity(), ExternalNfcServiceCallback, View.OnClickListener {
@@ -64,7 +62,7 @@ class MainActivity : AppCompatActivity(), ExternalNfcServiceCallback, View.OnCli
     private fun initService() {
         externalReaderService = ExternalNfcServiceAdapter(
             this,
-            MinovaService::class.java,
+            McrService::class.java,
             false
         )
     }
@@ -74,52 +72,50 @@ class MainActivity : AppCompatActivity(), ExternalNfcServiceCallback, View.OnCli
         radioBuzz = findViewById(R.id.buzz)
         radioDisplayText = findViewById(R.id.displayText)
         radioDisplayTextDelayed = findViewById(R.id.displayTextDelayed)
-
         editTextDuration = findViewById(R.id.duration)
         editTextTimes = findViewById(R.id.times)
-
         editTextXAxis = findViewById(R.id.displayXAxis)
         editTextYAxis = findViewById(R.id.displayYAxis)
         editTextFont = findViewById(R.id.fontType)
         editTextText = findViewById(R.id.text)
         editTextDelay = findViewById(R.id.delay)
-
         commandButton = findViewById(R.id.commandButton)
 
-        commandSelector.setOnCheckedChangeListener { _, checkedId ->
-            hideEditTexts()
-            when (findViewById<RadioButton>(checkedId)) {
-                radioBuzz -> {
-                    editTextDuration.show()
-                    editTextTimes.show()
-                }
-                radioDisplayText -> {
-                    editTextXAxis.show()
-                    editTextYAxis.show()
-                    editTextFont.show()
-                    editTextText.show()
-                }
-                radioDisplayTextDelayed -> {
-                    editTextXAxis.show()
-                    editTextYAxis.show()
-                    editTextFont.show()
-                    editTextText.show()
-                    editTextDelay.show()
-                }
-            }
-        }
-
+        commandSelector.setOnCheckedChangeListener { _, checkedId -> onCheckedChange(checkedId) }
         commandButton.setOnClickListener(this)
     }
 
+    private fun onCheckedChange(checkedId: Int) {
+        hideEditTexts()
+        when (findViewById<RadioButton>(checkedId)) {
+            radioBuzz -> {
+                editTextDuration.show()
+                editTextTimes.show()
+            }
+            radioDisplayText -> {
+                editTextXAxis.show()
+                editTextYAxis.show()
+                editTextFont.show()
+                editTextText.show()
+            }
+            radioDisplayTextDelayed -> {
+                editTextXAxis.show()
+                editTextYAxis.show()
+                editTextFont.show()
+                editTextText.show()
+                editTextDelay.show()
+            }
+        }
+    }
+
     private fun hideEditTexts() {
-        editTextDuration.hide()
-        editTextTimes.hide()
-        editTextXAxis.hide()
-        editTextYAxis.hide()
-        editTextFont.hide()
-        editTextText.hide()
-        editTextDelay.hide()
+        editTextDuration.clearAndHide()
+        editTextTimes.clearAndHide()
+        editTextXAxis.clearAndHide()
+        editTextYAxis.clearAndHide()
+        editTextFont.clearAndHide()
+        editTextText.clearAndHide()
+        editTextDelay.clearAndHide()
     }
 
     override fun onClick(v: View?) {
@@ -158,7 +154,7 @@ class MainActivity : AppCompatActivity(), ExternalNfcServiceCallback, View.OnCli
     }
 
     private fun startService() {
-        externalReaderService?.startService(bundleOf())
+        externalReaderService?.startService(null)
     }
 
     private fun registerReceivers() {
